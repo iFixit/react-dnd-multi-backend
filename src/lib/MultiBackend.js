@@ -9,7 +9,11 @@ const Backend = {
 
 class MultiBackend {
   constructor(manager, sourceOptions) {
-    const options = Object.assign({start: Backend.HTML5}, sourceOptions || {});
+    let options = {start: Backend.HTML5};
+
+    for (optionName in (sourceOptions || {})) {
+      options[optionName] = sourceOptions[optionName];
+    }
 
     this.current = options.start;
 
@@ -28,9 +32,7 @@ class MultiBackend {
       'applyToBackend', 'callBackends',
       'restrictTouchBackend', 'freeTouchBackend'
     ];
-    for (let func of funcs) {
-      this[func] = this[func].bind(this);
-    }
+    funcs.forEach(func => this[func] = this[func].bind(this));
   }
 
   // DnD Backend API
@@ -104,7 +106,7 @@ class MultiBackend {
   }
 
   cleanUpHandlers(backend) {
-    for (let id of Object.keys(this.nodes)) {
+    for (let id in this.nodes) {
       const node = this.nodes[id];
       node.handlers[backend]();
       node.handlers[backend] = null;
@@ -153,7 +155,7 @@ class MultiBackend {
   }
 
   freeTouchBackend() {
-    for (let id of Object.keys(this.nodes)) {
+    for (let id in this.nodes) {
       const node = this.nodes[id];
       node.handlers[Backend.TOUCH]();
       node.handlers[Backend.TOUCH] = this.applyToBackend(Backend.TOUCH, node.func, node.args);
